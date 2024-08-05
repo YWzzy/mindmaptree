@@ -1,11 +1,11 @@
-import KeyboardEvents from './keyboard-events';
-import TextEditor from '../text-editor';
-import Selection from '../selection/selection';
-import MultiSelect from '../selection/multi-select';
-import ViewportInteraction from '../viewport-interaction/viewport-interaction';
-import ToolOperation from '../tool-operation';
-import { isWindows } from '../helper';
-import type { ArrowType } from '../selection/selection-arrow-next';
+import KeyboardEvents from "./keyboard-events";
+import TextEditor from "../text-editor";
+import Selection from "../selection/selection";
+import MultiSelect from "../selection/multi-select";
+import ViewportInteraction from "../viewport-interaction/viewport-interaction";
+import ToolOperation from "../tool-operation";
+import { isWindows } from "../helper";
+import type { ArrowType } from "../selection/selection-arrow-next";
 
 interface KeyboardOptions {
   toolOperation: ToolOperation;
@@ -20,32 +20,35 @@ class Keyboard {
   public constructor(options: KeyboardOptions) {
     this.keyboardEvents = new KeyboardEvents();
 
-    this.keyboardEvents.on('keydown', (event: KeyboardEvent) => {
+    this.keyboardEvents.on("keydown", (event: KeyboardEvent) => {
       this.handleKeydown(event, options);
     });
 
-    this.keyboardEvents.on('keyup', (event: KeyboardEvent) => {
+    this.keyboardEvents.on("keyup", (event: KeyboardEvent) => {
       this.handleKeyup(event, options);
     });
   }
 
-  private handleKeydown = (event: KeyboardEvent, {
-    toolOperation,
-    textEditor,
-    selection,
-    multiSelect,
-    viewportInteraction,
-  }: KeyboardOptions): void => {
+  private handleKeydown = (
+    event: KeyboardEvent,
+    {
+      toolOperation,
+      textEditor,
+      selection,
+      multiSelect,
+      viewportInteraction,
+    }: KeyboardOptions
+  ): void => {
     const { key, ctrlKey, shiftKey, metaKey } = event;
 
     if (textEditor.isShowing()) {
       switch (key) {
-        case 'Escape': {
+        case "Escape": {
           textEditor.hide();
           break;
         }
-        case 'Tab':
-        case 'Enter': {
+        case "Tab":
+        case "Enter": {
           textEditor.finishEdit();
           break;
         }
@@ -58,30 +61,55 @@ class Keyboard {
     if (realCtrlKey && shiftKey) {
       switch (key) {
         // ctrl + shift + z
-        case 'z': {
+        case "z": {
           toolOperation.redo();
+          break;
+        }
+        // ctrl + shift + 1
+        case "1": {
+          toolOperation.addBrotherNode();
+          break;
+        }
+        // ctrl + shift + 2
+        case "2": {
+          toolOperation.addChildNode();
           break;
         }
       }
     } else if (realCtrlKey && !shiftKey) {
       switch (key) {
         // ctrl + z
-        case 'z': {
+        case "z": {
           toolOperation.undo();
           break;
         }
-        case '=': {
+        case "=": {
           event.preventDefault();
           viewportInteraction.zoomIn();
           break;
         }
-        case '-': {
+        case "1": {
+          event.preventDefault();
+          toolOperation.addBrotherNode();
+          break;
+        }
+        case "2": {
+          event.preventDefault();
+          toolOperation.addChildNode();
+          break;
+        }
+        case "+": {
+          event.preventDefault();
+          viewportInteraction.zoomIn();
+          break;
+        }
+        case "-": {
           event.preventDefault();
           viewportInteraction.zoomOut();
           break;
         }
-        case 'Meta':
-        case 'Alt': {
+        case "Meta":
+        case "Alt": {
           selection.setIsMultiClickMode(true);
           multiSelect.disable();
           viewportInteraction.enableBackgroundDrag();
@@ -89,16 +117,16 @@ class Keyboard {
           break;
         }
         default: {
-          break
+          break;
         }
       }
     } else if (!metaKey && !shiftKey && !ctrlKey) {
       switch (key) {
-        case 'Enter': {
+        case "Enter": {
           toolOperation.addBrotherNode();
           break;
         }
-        case 'Tab': {
+        case "Tab": {
           const selectNodes = selection.getSelectNodes();
           if (selectNodes.length > 0) {
             event.preventDefault();
@@ -106,14 +134,14 @@ class Keyboard {
           toolOperation.addChildNode();
           break;
         }
-        case 'Backspace': {
+        case "Backspace": {
           toolOperation.removeNode();
           break;
         }
-        case 'ArrowUp':
-        case 'ArrowRight':
-        case 'ArrowDown':
-        case 'ArrowLeft': {
+        case "ArrowUp":
+        case "ArrowRight":
+        case "ArrowDown":
+        case "ArrowLeft": {
           selection.selectArrowNext(key as ArrowType);
           break;
         }
@@ -122,16 +150,15 @@ class Keyboard {
         }
       }
     }
-  }
+  };
 
-  private handleKeyup = (event: KeyboardEvent, {
-    selection,
-    multiSelect,
-    viewportInteraction,
-  }: KeyboardOptions): void => {
+  private handleKeyup = (
+    event: KeyboardEvent,
+    { selection, multiSelect, viewportInteraction }: KeyboardOptions
+  ): void => {
     switch (event.key) {
-      case 'Meta':
-      case 'Alt': {
+      case "Meta":
+      case "Alt": {
         selection.setIsMultiClickMode(false);
         multiSelect.enable();
         viewportInteraction.disableBackgroundDrag();
@@ -142,7 +169,7 @@ class Keyboard {
         break;
       }
     }
-  }
+  };
 
   public clear() {
     this.keyboardEvents.clear();

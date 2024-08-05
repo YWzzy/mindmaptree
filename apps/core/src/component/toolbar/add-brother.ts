@@ -1,4 +1,4 @@
-import Selection from "../../selection/selection";
+import Selection from "@/src/selection/selection";
 import ToolOperation from "../../tool-operation";
 import { MElement } from "../m-element";
 import { createToolbarItem } from "./create-toolbar-item";
