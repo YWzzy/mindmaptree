@@ -1,8 +1,7 @@
-
-import Selection from '../../selection/selection';
-import ToolOperation from '../../tool-operation';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import Selection from "../../selection/selection";
+import ToolOperation from "../../tool-operation";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class AddChild {
   public readonly el: MElement;
@@ -26,9 +25,9 @@ class AddChild {
   public setState(): void {
     const selectNodes = this.selection.getSelectNodes();
     if (selectNodes.length === 1) {
-      this.btnEl.removeClass('disabled');
+      this.btnEl.removeClass("disabled");
     } else {
-      this.btnEl.addClass('disabled');
+      this.btnEl.addClass("disabled");
     }
   }
 
@@ -36,17 +35,18 @@ class AddChild {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'add-brother',
-      tipLabel: 'Add Topic',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "add-brother",
+      tipLabel: "Add Topic",
     });
 
-    btnEl.addEventListener('click', () => {
-      this.toolOperation.addBrotherNode();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.toolOperation.addBrotherNode();
+      },
+      false
+    );
 
     return {
       el,
