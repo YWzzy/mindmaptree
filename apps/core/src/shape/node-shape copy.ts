@@ -20,10 +20,6 @@ const defaultPaddingWidth = 40;
 const defaultRectHeight = 37;
 const borderPadding = 6;
 
-// Add default max width and height
-const defaultMaxWidth = 200;
-const defaultMaxHeight = 500;
-
 export interface NodeShapeOptions {
   paper: RaphaelPaper;
   x?: number;
@@ -36,8 +32,6 @@ export interface NodeShapeOptions {
   borderBaseAttr?: Partial<RaphaelAttributes>;
   imageData?: ImageData | null;
   link?: string;
-  maxWidth?: number; // Add maxWidth option
-  maxHeight?: number; // Add maxHeight option
 }
 
 class NodeShape {
@@ -52,12 +46,9 @@ class NodeShape {
   private readonly shapeEventEmitter: ShapeEventEmitter;
   private readonly nodeShapeStyle: NodeShapeStyle;
   private readonly imageData: ImageData | null = null;
-  private readonly maxWidth: number; // Add maxWidth property
-  private readonly maxHeight: number; // Add maxHeight property
   private label: string;
   private isHide: boolean = false;
   private isHoverInCalled: boolean = false;
-
   public constructor({
     paper,
     x,
@@ -70,17 +61,14 @@ class NodeShape {
     borderBaseAttr,
     imageData,
     link,
-    maxWidth = defaultMaxWidth, // Set default maxWidth
-    maxHeight = defaultMaxHeight, // Set default maxHeight
   }: NodeShapeOptions) {
     this.paper = paper;
     this.label = label;
     this.paddingWidth = paddingWidth;
     this.rectHeight = rectHeight;
-    this.maxWidth = maxWidth;
-    this.maxHeight = maxHeight;
 
     const hasValidPosition = x !== undefined && y !== undefined;
+    // If there are no x or y, then move shape to the invisible position.
     const shapeX = hasValidPosition ? x : invisibleX;
     const shapeY = hasValidPosition ? y : invisibleY;
 
@@ -142,17 +130,14 @@ class NodeShape {
     this.initHover();
   }
 
-  // 获取矩形边界框
   public getBBox(): RaphaelAxisAlignedBoundingBox {
     return this.rectShape.getBBox();
   }
 
-  // 获取标签边界框
   public getLabelBBox(): RaphaelAxisAlignedBoundingBox {
     return this.labelShape.getBBox();
   }
 
-  // 设置标签
   public setLabel(label: string, direction?: Direction): void {
     const beforeLabelBBox = this.labelShape.getBBox();
     this.labelShape.attr({
@@ -172,7 +157,6 @@ class NodeShape {
     this.label = label;
   }
 
-  // 平移到指定位置
   public translateTo(x: number, y: number): void {
     const { x: oldX, y: oldY } = this.getBBox();
     const dx = x - oldX;
@@ -185,22 +169,18 @@ class NodeShape {
     this.shapeSet.translate(dx, dy);
   }
 
-  // 按指定偏移量平移
   public translate(dx: number, dy: number): void {
     this.shapeSet.translate(dx, dy);
   }
 
-  // 设置样式
   public setStyle(styleType: StyleType): void {
     this.nodeShapeStyle.setStyle(styleType);
   }
 
-  // 获取当前样式
   public getStyle(): StyleType {
     return this.nodeShapeStyle.getStyle();
   }
 
-  // 克隆当前形状
   public clone(): NodeShape {
     const { x, y } = this.getBBox();
     return new NodeShape({
@@ -214,13 +194,11 @@ class NodeShape {
     });
   }
 
-  // 移除形状
   public remove(): void {
     this.shapeSet.remove();
     this.shapeEventEmitter.removeAllListeners();
   }
 
-  // 添加事件监听器
   public on<T extends EventNames>(
     eventName: EventNames,
     ...args: EventArgs<T>
@@ -228,37 +206,31 @@ class NodeShape {
     this.shapeEventEmitter.on(eventName, ...args);
   }
 
-  // 显示形状
   public show(): void {
     this.shapeSet.show();
     this.isHide = false;
   }
 
-  // 隐藏形状
   public hide(): void {
     this.shapeSet.hide();
     this.isHide = true;
   }
 
-  // 获取是否隐藏状态
   public getIsHide(): boolean {
     return this.isHide;
   }
 
-  // 将形状移到前面
   public toFront(): void {
     this.borderShape.toFront();
     this.rectShape.toFront();
     this.labelShape.toFront();
   }
 
-  // 检查形状是否在不可见位置
   public isInvisible(): boolean {
     const bbox = this.getBBox();
     return bbox.x === invisibleX && bbox.y === invisibleY;
   }
 
-  // 内部方法：平移形状到指定位置
   private shapeTranslateTo(
     shape: RaphaelElement | RaphaelSet,
     x: number,
@@ -282,8 +254,6 @@ class NodeShape {
       paddingWidth,
       rectHeight,
       imageData,
-      maxWidth,
-      maxHeight,
     } = this;
 
     const labelBBox = labelShape.getBBox();
@@ -291,9 +261,6 @@ class NodeShape {
 
     const leftShape = imageData?.toward === "right" ? labelShape : imageShape;
     const rightShape = imageData?.toward === "right" ? imageShape : labelShape;
-    console.log("====================================");
-    console.log("x,y", x, y);
-    console.log("====================================");
     const defaultBBox = { x: 0, y: 0, width: 0, height: 0 };
     const leftBBox = leftShape?.getBBox() || defaultBBox;
     const rightBBox = rightShape?.getBBox() || defaultBBox;
@@ -306,14 +273,10 @@ class NodeShape {
           : 8;
     }
 
-    let contentWidth =
+    const contentWidth =
       leftBBox.width + rightBBox.width + paddingWidth + imageGap;
-    let contentHeight =
+    const contentHeight =
       paddingHeight + Math.max(leftBBox.height, rightBBox.height);
-
-    // Limit content size to maxWidth and maxHeight
-    contentWidth = Math.min(contentWidth, maxWidth);
-    contentHeight = Math.min(contentHeight, maxHeight);
 
     rectShape.attr({
       width: contentWidth,
@@ -337,38 +300,6 @@ class NodeShape {
     );
     leftShape && this.shapeTranslateTo(leftShape, leftShapeX, leftShapeY);
     rightShape && this.shapeTranslateTo(rightShape, rightShapeX, rightShapeY);
-
-    // Clip content that exceeds max dimensions
-    this.clipContent(contentWidth, contentHeight);
-  }
-
-  private clipContent(width: number, height: number): void {
-    console.log("====================================");
-    console.log("width, height", width, height);
-    console.log("====================================");
-    const clipPath = this.paper
-      .path(`M0,0 L${width},0 L${width},${height} L0,${height}Z`)
-      .attr({ stroke: "none" });
-
-    // Create a unique id for the clipPath
-    const clipPathId = `clipPath_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Set the id of the clipPath
-    (clipPath.node as SVGElement).id = clipPathId;
-
-    // Move the clipPath to a defs element
-    const defs =
-      this.paper.canvas.querySelector("defs") ||
-      this.paper.canvas.insertBefore(
-        document.createElementNS("http://www.w3.org/2000/svg", "defs"),
-        this.paper.canvas.firstChild
-      );
-    defs.appendChild(clipPath.node);
-
-    // Apply the clip-path to each element in the set
-    this.shapeSet.forEach((element) => {
-      (element.node as SVGElement).style.clipPath = `url(#${clipPathId})`;
-    });
   }
 
   private initHover(): void {
