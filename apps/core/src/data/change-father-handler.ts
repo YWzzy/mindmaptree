@@ -1,16 +1,19 @@
-import * as Y from 'yjs';
-import { updateNodeDataMap, getFatherDatas } from './data-helper';
-import { Direction } from '../types';
-import type { NodeData } from '../types';
+import * as Y from "yjs";
+import { updateNodeDataMap, getFatherDatas } from "./data-helper";
+import { Direction } from "../types";
+import type { NodeData } from "../types";
 
 class ChangeFatherHandler {
   public constructor(
     private readonly ydoc: Y.Doc,
-    private readonly nodeDataMap: Y.Map<NodeData>,
-  ) { }
+    private readonly nodeDataMap: Y.Map<NodeData>
+  ) {}
 
   public changeFather({
-    selectionId, newFatherId, direction, childIndex,
+    selectionId,
+    newFatherId,
+    direction,
+    childIndex,
   }: {
     selectionId: string;
     newFatherId: string;
@@ -19,9 +22,14 @@ class ChangeFatherHandler {
   }): void {
     this.ydoc.transact(() => {
       // 删除与原父节点的关系
-      const [selectionFatherId, selectionFather] = getFatherDatas(this.nodeDataMap, selectionId);
+      const [selectionFatherId, selectionFather] = getFatherDatas(
+        this.nodeDataMap,
+        selectionId
+      );
       const selectionBrothers = selectionFather.children;
-      let selectionIndex = selectionBrothers.findIndex((brotherId) => brotherId === selectionId);
+      let selectionIndex = selectionBrothers.findIndex(
+        (brotherId) => brotherId === selectionId
+      );
       selectionIndex = selectionIndex === undefined ? -1 : selectionIndex;
       if (selectionIndex > -1) {
         selectionBrothers.splice(selectionIndex, 1);
@@ -34,7 +42,8 @@ class ChangeFatherHandler {
       const newFatherData = this.nodeDataMap.get(newFatherId)!;
       const newBrothers = newFatherData.children;
 
-      const newChildIndex = childIndex === undefined ? newBrothers.length : childIndex;
+      const newChildIndex =
+        childIndex === undefined ? newBrothers.length : childIndex;
       if (newFatherData.isRoot) {
         this.spliceChildInRoot({
           children: newBrothers,
@@ -57,7 +66,10 @@ class ChangeFatherHandler {
   }
 
   private spliceChildInRoot({
-    children, start, childId, direction,
+    children,
+    start,
+    childId,
+    direction,
   }: {
     children: string[];
     start: number;
@@ -95,7 +107,9 @@ class ChangeFatherHandler {
       direction,
     });
 
-    nodeData.children.forEach((childId) => this.changeDirection(childId, direction));
+    nodeData.children.forEach((childId) =>
+      this.changeDirection(childId, direction)
+    );
   }
 }
 
