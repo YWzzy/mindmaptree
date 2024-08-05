@@ -10,7 +10,7 @@
   <a href="https://www.npmjs.com/package/mindmap-tree">
     <img src="https://img.shields.io/npm/v/mindmap-tree" alt="npm" />
   </a>
-  <a href="https://github.com/RockyRen/mindmaptree">
+  <a href="https://github.com/YWzzy/mindmaptree">
     <img src="https://img.shields.io/github/license/RockyRen/mindmaptree" alt="ci" />
   </a>
 </p>
@@ -18,21 +18,23 @@
 [![mindmap-tree demo](https://rockyren.github.io/mindmaptree/assets/wiki/demo.jpg)](https://rockyren.github.io/mindmaptree/demo.html)
 
 ## Demo
-[Demo](https://rockyren.github.io/mindmaptree/resume.html) 
+
+[Demo](https://rockyren.github.io/mindmaptree/resume.html)
 
 ## 相关文章
-* [Web思维导图实现与前端架构思考](https://juejin.cn/post/7202495679405654075)
+
+- [Web 思维导图实现与前端架构思考](https://juejin.cn/post/7202495679405654075)
 
 ## 功能
-* 添加 & 删除节点
-* 编辑节点文本
-* 撤销 & 重做
-* 修改视图scale
-* 拖拽改变节点关系
-* 键盘操作
-* 多选操作
-* 展开 & 收缩节点
 
+- 添加 & 删除节点
+- 编辑节点文本
+- 撤销 & 重做
+- 修改视图 scale
+- 拖拽改变节点关系
+- 键盘操作
+- 多选操作
+- 展开 & 收缩节点
 
 ## 开始使用
 
@@ -63,24 +65,24 @@ new MindmapTree({
 
 MindmapTree constructor 参数:
 
-| Prop            | Type    | Default | Description                                            |
-|-----------------|:-------:|---------|--------------------------------------------------------|
-| **container**       | String \| Element   | ''      |   container的HTML元素     |
-| **data** | NodeDataMap   | Record<string, NodeData>      | 思维导图的初始化数据 |
-| **isDebug**    | Boolean   | false     | 是否调试  |
+| Prop          |       Type        | Default                  | Description            |
+| ------------- | :---------------: | ------------------------ | ---------------------- |
+| **container** | String \| Element | ''                       | container 的 HTML 元素 |
+| **data**      |    NodeDataMap    | Record<string, NodeData> | 思维导图的初始化数据   |
+| **isDebug**   |      Boolean      | false                    | 是否调试               |
 
-NodeData params: 
+NodeData params:
 
-| Prop            | Type    | Default | Description                                            |
-|-----------------|:-------:|---------|--------------------------------------------------------|
-| **label**       | String   | ''      | 节点文本          |
-| **direction** | Number   |  0  |  节点方向, 1:右边, 0:无, -1:左边    |
-| **isRoot**    | Boolean   | false     | 是否根节点  |
-| **children**    | String[]   | []     | 子节点的id数组  |
-| **isExpand**    | Boolean   | true   | 是否展开节点  |
+| Prop          |   Type   | Default | Description                     |
+| ------------- | :------: | ------- | ------------------------------- |
+| **label**     |  String  | ''      | 节点文本                        |
+| **direction** |  Number  | 0       | 节点方向, 1:右边, 0:无, -1:左边 |
+| **isRoot**    | Boolean  | false   | 是否根节点                      |
+| **children**  | String[] | []      | 子节点的 id 数组                |
+| **isExpand**  | Boolean  | true    | 是否展开节点                    |
 
 ## License
 
-[MIT](https://github.com/RockyRen/mindmaptree/blob/master/LICENSE)
+[MIT](https://github.com/YWzzy/mindmaptree/blob/master/LICENSE)
 
 Copyright (c) 2023 - present, RockyRen

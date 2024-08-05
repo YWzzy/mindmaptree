@@ -20,11 +20,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RockyRen/mindmaptree.git"
+    "url": "git+https://github.com/YWzzy/mindmaptree.git"
   },
-  "homepage": "https://github.com/RockyRen/mindmaptree#readme",
+  "homepage": "https://github.com/YWzzy/mindmaptree#readme",
   "bugs": {
-    "url": "https://github.com/RockyRen/mindmaptree/issues"
+    "url": "https://github.com/YWzzy/mindmaptree/issues"
   },
   "keywords": [
     "mindmap",

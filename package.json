@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RockyRen/mindmaptree.git"
+    "url": "git+https://github.com/YWzzy/mindmaptree.git"
   },
   "author": "RockyRen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/RockyRen/mindmaptree/issues"
+    "url": "https://github.com/YWzzy/mindmaptree/issues"
   },
-  "homepage": "https://github.com/RockyRen/mindmaptree#readme",
+  "homepage": "https://github.com/YWzzy/mindmaptree#readme",
   "dependencies": {
     "eventemitter3": "^5.0.0",
     "raphael": "^2.3.0",

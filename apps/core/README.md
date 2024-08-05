@@ -10,34 +10,32 @@
   <a href="https://www.npmjs.com/package/mindmap-tree">
     <img src="https://img.shields.io/npm/v/mindmap-tree" alt="npm" />
   </a>
-  <a href="https://github.com/RockyRen/mindmaptree">
+  <a href="https://github.com/YWzzy/mindmaptree">
     <img src="https://img.shields.io/github/license/RockyRen/mindmaptree" alt="ci" />
   </a>
 
 </p>
 
 <p align="center">
-  <a href="https://github.com/RockyRen/mindmaptree/blob/master/wiki/README.zh.md">简体中文文档</a>
+  <a href="https://github.com/YWzzy/mindmaptree/blob/master/wiki/README.zh.md">简体中文文档</a>
 </p>
 
 [![mindmap-tree demo](https://rockyren.github.io/mindmaptree/assets/wiki/demo.jpg)](https://rockyren.github.io/mindmaptree/demo.html)
 
-
 ## Demo
-[Demo](https://rockyren.github.io/mindmaptree/demo.html) 
 
+[Demo](https://rockyren.github.io/mindmaptree/demo.html)
 
 ## Feature
 
-* Add & Delete Node
-* Edit Node Text
-* Undo & Redo
-* Change Scale
-* Drag Node to change Father
-* Keyboard operation
-* Multi select
-* Expand & Shrink Node
-
+- Add & Delete Node
+- Edit Node Text
+- Undo & Redo
+- Change Scale
+- Drag Node to change Father
+- Keyboard operation
+- Multi select
+- Expand & Shrink Node
 
 ## Get Started
 
@@ -74,7 +72,7 @@ MindmapTree constructor options:
 | **data**      |    NodeDataMap    | Record<string, NodeData> | Initial data of mindmap   |
 | **isDebug**   |      Boolean      | false                    | Is debug or not           |
 
-NodeData params: 
+NodeData params:
 
 | Prop          |   Type   | Default | Description                              |
 | ------------- | :------: | ------- | ---------------------------------------- |
@@ -86,6 +84,6 @@ NodeData params:
 
 ## License
 
-[MIT](https://github.com/RockyRen/mindmaptree/blob/master/LICENSE)
+[MIT](https://github.com/YWzzy/mindmaptree/blob/master/LICENSE)
 
 Copyright (c) 2023 - present, RockyRen
