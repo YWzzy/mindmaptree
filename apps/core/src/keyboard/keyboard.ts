@@ -126,12 +126,32 @@ class Keyboard {
           toolOperation.addBrotherNode();
           break;
         }
+        // case "Tab": {
+        //   const selectNodes = selection.getSelectNodes();
+        //   if (selectNodes.length > 0) {
+        //     event.preventDefault();
+        //   }
+        //   toolOperation.addChildNode();
+        //   break;
+        // }
         case "Tab": {
+          // 调用AI接口，获取下一个节点
           const selectNodes = selection.getSelectNodes();
+
           if (selectNodes.length > 0) {
             event.preventDefault();
           }
-          toolOperation.addChildNode();
+          console.log("====================================");
+          console.log("调用AI接口，获取下一个节点");
+          console.log(selectNodes);
+          console.log(selectNodes[0].label);
+          console.log("是否有下一级", selectNodes[0].children.length > 0);
+          console.log("====================================");
+          setTimeout(() => {
+            if (selectNodes[0].children.length == 0) {
+              toolOperation.addChildNode();
+            }
+          }, 1000);
           break;
         }
         case "Backspace": {

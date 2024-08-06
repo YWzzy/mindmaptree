@@ -23,7 +23,6 @@ const borderPadding = 6;
 // Add default max width and height
 const defaultMaxWidth = 400;
 const defaultMaxHeight = 500;
-
 export interface NodeShapeOptions {
   paper: RaphaelPaper;
   x?: number;
