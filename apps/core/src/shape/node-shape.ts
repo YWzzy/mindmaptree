@@ -16,12 +16,12 @@ import type { ImageData } from "../types";
 const invisibleX = -999999;
 const invisibleY = -999999;
 
-const defaultPaddingWidth = 40;
+const defaultPaddingWidth = 20;
 const defaultRectHeight = 37;
 const borderPadding = 6;
 
 // Add default max width and height
-const defaultMaxWidth = 200;
+const defaultMaxWidth = 400;
 const defaultMaxHeight = 500;
 
 export interface NodeShapeOptions {
@@ -64,7 +64,7 @@ class NodeShape {
     y,
     label,
     paddingWidth = defaultPaddingWidth,
-    rectHeight = defaultRectHeight,
+    rectHeight = Math.max(defaultRectHeight, defaultMaxHeight),
     labelBaseAttr,
     rectBaseAttr,
     borderBaseAttr,
@@ -347,9 +347,10 @@ class NodeShape {
     rightShape && this.shapeTranslateTo(rightShape, rightShapeX, rightShapeY);
   }
 
+  // 文本换行
   private wrapText(text: string, maxWidth: number, maxHeight: number): string {
     const words = text.split(" ");
-    let lines = [];
+    let lines: string[] = [];
     let currentLine = words[0];
 
     for (let i = 1; i < words.length; i++) {
@@ -367,11 +368,17 @@ class NodeShape {
 
     // Truncate if exceeds maxHeight
     let totalHeight = 0;
-    let truncatedLines = [];
+    let truncatedLines: string[] = [];
     for (let line of lines) {
-      totalHeight += this.getTextHeight(line);
+      const lineHeight = this.getTextHeight(line);
+      totalHeight += lineHeight;
       if (totalHeight > maxHeight) {
-        if (truncatedLines.length > 0) {
+        const remainingHeight = maxHeight - (totalHeight - lineHeight);
+        if (remainingHeight > 0) {
+          truncatedLines.push(
+            this.truncateLine(line, maxWidth, remainingHeight)
+          );
+        } else if (truncatedLines.length > 0) {
           truncatedLines[truncatedLines.length - 1] += "...";
         } else {
           truncatedLines.push(line + "...");
@@ -384,28 +391,53 @@ class NodeShape {
     return truncatedLines.join("\n");
   }
 
+  private truncateLine(
+    line: string,
+    maxWidth: number,
+    remainingHeight: number
+  ): string {
+    let truncatedLine = "";
+    for (let i = 0; i < line.length; i++) {
+      truncatedLine += line[i];
+      if (this.getTextWidth(truncatedLine) > maxWidth) {
+        return truncatedLine.slice(0, -1) + "...";
+      }
+    }
+    return truncatedLine;
+  }
+
   private getTextWidth(text: string): number {
-    const font = this.labelShape.attr("font") as string;
     const fontSize = this.labelShape.attr("font-size") as number;
-    const tempText = this.paper.text(0, 0, text).attr({
-      font: font,
-      "font-size": fontSize,
-    });
-    const width = tempText.getBBox().width;
-    tempText.remove();
-    return width;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const textElement = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+    textElement.setAttribute("font-size", fontSize.toString());
+    textElement.setAttribute("font-family", "Arial");
+    textElement.textContent = text;
+    svg.appendChild(textElement);
+    document.body.appendChild(svg);
+    const bbox = textElement.getBBox();
+    document.body.removeChild(svg);
+    return bbox.width;
   }
 
   private getTextHeight(text: string): number {
-    const font = this.labelShape.attr("font") as string;
     const fontSize = this.labelShape.attr("font-size") as number;
-    const tempText = this.paper.text(0, 0, text).attr({
-      font: font,
-      "font-size": fontSize,
-    });
-    const height = tempText.getBBox().height;
-    tempText.remove();
-    return height;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const textElement = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+    textElement.setAttribute("font-size", fontSize.toString());
+    textElement.setAttribute("font-family", "Arial");
+    textElement.textContent = text;
+    svg.appendChild(textElement);
+    document.body.appendChild(svg);
+    const bbox = textElement.getBBox();
+    document.body.removeChild(svg);
+    return bbox.height;
   }
 
   private clipContent(width: number, height: number): void {
