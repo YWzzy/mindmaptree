@@ -20,5 +20,6 @@ export function createRootNodeShape(options: NodeShapeOptions): NodeShape {
     },
     paddingWidth,
     rectHeight,
+    maxHeight: 300,
   });
 }

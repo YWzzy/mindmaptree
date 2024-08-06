@@ -1,18 +1,21 @@
-import Viewport from '../viewport';
-import Expander from './expander';
-import Drag from '../drag/drag';
-import NodeShape from '../shape/node-shape';
-import CollaborateShape from '../shape/collaborate-shape';
-import ShapeGenerator from './shape-generator';
-import { getDepthType, DepthType } from '../helper';
-import { Direction } from '../types';
-import type { ExpanderEventMap } from './expander';
-import type { RaphaelPaper, RaphaelAxisAlignedBoundingBox } from 'raphael';
-import type { DragEventMap } from '../drag/drag';
-import type { EdgeShape } from './shape-generator';
-import type { EventNames as ShapeEventNames, EventArgs as ShapeEventArgs } from '../shape/common/shape-event-emitter';
-import type { StyleType } from '../shape/common/node-shape-style';
-import type { ImageData } from '../types';
+import Viewport from "../viewport";
+import Expander from "./expander";
+import Drag from "../drag/drag";
+import NodeShape from "../shape/node-shape";
+import CollaborateShape from "../shape/collaborate-shape";
+import ShapeGenerator from "./shape-generator";
+import { getDepthType, DepthType } from "../helper";
+import { Direction } from "../types";
+import type { ExpanderEventMap } from "./expander";
+import type { RaphaelPaper, RaphaelAxisAlignedBoundingBox } from "raphael";
+import type { DragEventMap } from "../drag/drag";
+import type { EdgeShape } from "./shape-generator";
+import type {
+  EventNames as ShapeEventNames,
+  EventArgs as ShapeEventArgs,
+} from "../shape/common/shape-event-emitter";
+import type { StyleType } from "../shape/common/node-shape-style";
+import type { ImageData } from "../types";
 
 export interface TraverseOptions {
   node: Node;
@@ -21,17 +24,20 @@ export interface TraverseOptions {
   expander: Expander;
   removeEdgeShape: () => void;
 }
-export type TraverseFunc = (node: Node, callback: (options: TraverseOptions) => void) => void;
+export type TraverseFunc = (
+  node: Node,
+  callback: (options: TraverseOptions) => void
+) => void;
 
 export interface NodeEventMap {
-  mousedown: ShapeEventArgs<'mousedown'>;
-  click: ShapeEventArgs<'click'>;
-  dblclick: ShapeEventArgs<'dblclick'>;
-  drag: ShapeEventArgs<'drag'>;
-  touchstart: ShapeEventArgs<'touchstart'>;
-  mousedownExpander: [ExpanderEventMap['mousedownExpander']];
-  dragEnd: [DragEventMap['dragEnd']];
-};
+  mousedown: ShapeEventArgs<"mousedown">;
+  click: ShapeEventArgs<"click">;
+  dblclick: ShapeEventArgs<"dblclick">;
+  drag: ShapeEventArgs<"drag">;
+  touchstart: ShapeEventArgs<"touchstart">;
+  mousedownExpander: [ExpanderEventMap["mousedownExpander"]];
+  dragEnd: [DragEventMap["dragEnd"]];
+}
 
 export type NodeEventNames = keyof NodeEventMap;
 
@@ -60,7 +66,7 @@ class Node {
   private readonly expander: Expander;
   private readonly drag: Drag | null = null;
   private readonly _imageData: ImageData | null = null;
-  private readonly _link: string = '';
+  private readonly _link: string = "";
   private _label: string;
   private _direction: Direction;
   private _children: Node[];
@@ -89,7 +95,7 @@ class Node {
     this._label = label;
     this._children = [];
     this._imageData = imageData || null;
-    this._link = link || '';
+    this._link = link || "";
 
     this.shapeGenerator = new ShapeGenerator({
       paper,
@@ -126,20 +132,40 @@ class Node {
     });
   }
 
-  public get id() { return this._id; }
-  public get depth() { return this._depth; }
-  public get direction() { return this._direction; }
-  public get father() { return this._father; }
-  public get label() { return this._label; }
-  public get children() { return this._children; }
-  public get isExpand() { return this.expander.getIsExpand(); }
-  public get imageData() { return this._imageData; }
-  public get link() { return this._link; }
+  public get id() {
+    return this._id;
+  }
+  public get depth() {
+    return this._depth;
+  }
+  public get direction() {
+    return this._direction;
+  }
+  public get father() {
+    return this._father;
+  }
+  public get label() {
+    return this._label;
+  }
+  public get children() {
+    return this._children;
+  }
+  public get isExpand() {
+    return this.expander.getIsExpand();
+  }
+  public get imageData() {
+    return this._imageData;
+  }
+  public get link() {
+    return this._link;
+  }
 
   public getDirectionChildren(direction: Direction): Node[] {
-    return this.children?.filter((child) => {
-      return child.direction === direction;
-    }) || [];
+    return (
+      this.children?.filter((child) => {
+        return child.direction === direction;
+      }) || []
+    );
   }
 
   public getBBox(): RaphaelAxisAlignedBoundingBox {
@@ -166,20 +192,38 @@ class Node {
     return this.getDepthType() === DepthType.root;
   }
 
-  public on<T extends NodeEventNames>(eventName: T, ...args: NodeEventMap[T]): void {
-    const shapeEventNames: NodeEventNames[] = ['mousedown', 'click', 'dblclick', 'drag', 'touchstart'];
-    const expanderEventNames: NodeEventNames[] = ['mousedownExpander'];
-    const dragEventNames: NodeEventNames[] = ['dragEnd'];
+  public on<T extends NodeEventNames>(
+    eventName: T,
+    ...args: NodeEventMap[T]
+  ): void {
+    const shapeEventNames: NodeEventNames[] = [
+      "mousedown",
+      "click",
+      "dblclick",
+      "drag",
+      "touchstart",
+    ];
+    const expanderEventNames: NodeEventNames[] = ["mousedownExpander"];
+    const dragEventNames: NodeEventNames[] = ["dragEnd"];
 
     if (shapeEventNames.includes(eventName)) {
-      if (eventName === 'drag' && !this.isRoot()) {
+      if (eventName === "drag" && !this.isRoot()) {
         return;
       }
-      this.nodeShape.on(eventName as ShapeEventNames, ...args as ShapeEventArgs<ShapeEventNames>);
+      this.nodeShape.on(
+        eventName as ShapeEventNames,
+        ...(args as ShapeEventArgs<ShapeEventNames>)
+      );
     } else if (expanderEventNames.includes(eventName)) {
-      this.expander.on(eventName as keyof ExpanderEventMap, ...args as [ExpanderEventMap[keyof ExpanderEventMap]]);
+      this.expander.on(
+        eventName as keyof ExpanderEventMap,
+        ...(args as [ExpanderEventMap[keyof ExpanderEventMap]])
+      );
     } else if (dragEventNames.includes(eventName)) {
-      this.drag?.on(eventName as keyof DragEventMap, ...args as [DragEventMap[keyof DragEventMap]])
+      this.drag?.on(
+        eventName as keyof DragEventMap,
+        ...(args as [DragEventMap[keyof DragEventMap]])
+      );
     }
   }
 
@@ -255,7 +299,9 @@ class Node {
     return this.nodeShape.isInvisible();
   }
 
-  public setCollaborateStyle(style: { color: string; name: string; } | null): void {
+  public setCollaborateStyle(
+    style: { color: string; name: string } | null
+  ): void {
     if (style) {
       this.collaborateShape = new CollaborateShape({
         paper: this.paper,
@@ -268,7 +314,10 @@ class Node {
     }
   }
 
-  private traverse(node: Node, callback: (options: TraverseOptions) => void): void {
+  private traverse(
+    node: Node,
+    callback: (options: TraverseOptions) => void
+  ): void {
     callback({
       node,
       nodeShape: node.nodeShape,
@@ -282,7 +331,7 @@ class Node {
   private removeEdgeShape = (): void => {
     this.edgeShape?.remove();
     this.edgeShape = null;
-  }
+  };
 }
 
 export default Node;

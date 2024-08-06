@@ -4,20 +4,22 @@ import { DepthType } from "../helper";
 import { updateNodeDataMap, getFatherDatas } from "./data-helper";
 import type { NodeData } from "../types";
 
-const firstLevetNodeName = "Main Topic";
-const grandchildNodeName = "Subtopic";
+const firstLevetNodeName = "Main Topic"; // 一级节点名称
+const grandchildNodeName = "Subtopic"; // 孙节点名称
 
 class AddHandler {
+  // 构造函数接受 ydoc 和 nodeDataMap 作为参数
   public constructor(
     private readonly ydoc: Y.Doc,
     private readonly nodeDataMap: Y.Map<NodeData>
   ) {}
 
+  // 添加子节点
   public addChildNode(selectionId: string, depth: number, newId: string): void {
     const selectionData = this.nodeDataMap.get(selectionId);
     if (!selectionData) return;
 
-    // If node is root, then add node equally to each direction
+    // 如果节点是根节点，则根据方向均匀地添加节点
     let direction = selectionData.direction;
     if (selectionData.isRoot) {
       const directionCounts = selectionData.children?.reduce(
@@ -57,6 +59,7 @@ class AddHandler {
     });
   }
 
+  // 添加兄弟节点
   public addBrotherNode(
     selectionId: string,
     depth: number,

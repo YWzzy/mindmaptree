@@ -1,15 +1,20 @@
-
-import Node from './node';
-import NodeShape from '../shape/node-shape';
-import { createFirstNodeShape } from '../shape/first-node-shape';
-import { createGrandchildNodeShape } from '../shape/grandchild-node-shape';
-import { createRootNodeShape } from '../shape/root-node-shape';
-import { createFirstEdgeShape, FirstEdgeShape } from '../shape/first-edge-shape';
-import { createGrandchildEdgeShape, GrandchildEdgeShape } from '../shape/grandchild-edge-shape';
-import { getDepthType, DepthType } from '../helper';
-import { Direction } from '../types';
-import type { RaphaelPaper } from 'raphael';
-import type { ImageData } from '../types';
+import Node from "./node";
+import NodeShape from "../shape/node-shape";
+import { createFirstNodeShape } from "../shape/first-node-shape";
+import { createGrandchildNodeShape } from "../shape/grandchild-node-shape";
+import { createRootNodeShape } from "../shape/root-node-shape";
+import {
+  createFirstEdgeShape,
+  FirstEdgeShape,
+} from "../shape/first-edge-shape";
+import {
+  createGrandchildEdgeShape,
+  GrandchildEdgeShape,
+} from "../shape/grandchild-edge-shape";
+import { getDepthType, DepthType } from "../helper";
+import { Direction } from "../types";
+import type { RaphaelPaper } from "raphael";
+import type { ImageData } from "../types";
 
 export type EdgeShape = FirstEdgeShape | GrandchildEdgeShape;
 
@@ -20,7 +25,7 @@ class ShapeGenerator {
   private readonly label: string;
   private readonly father: Node | null = null;
   private readonly imageData: ImageData | null = null;
-  private readonly link: string = '';
+  private readonly link: string = "";
   private direction: Direction;
   public constructor({
     paper,
@@ -31,11 +36,11 @@ class ShapeGenerator {
     imageData,
     link,
   }: {
-    paper: RaphaelPaper,
-    depth: number,
-    label: string,
-    direction: Direction,
-    father: Node | null,
+    paper: RaphaelPaper;
+    depth: number;
+    label: string;
+    direction: Direction;
+    father: Node | null;
     imageData?: ImageData | null;
     link?: string;
   }) {
@@ -45,17 +50,11 @@ class ShapeGenerator {
     this.father = father;
     this.direction = direction;
     this.imageData = imageData || null;
-    this.link = link || '';
+    this.link = link || "";
   }
 
   public createNode(x?: number, y?: number): NodeShape {
-    const {
-      paper,
-      depth,
-      label,
-      imageData,
-      link,
-    } = this;
+    const { paper, depth, label, imageData, link } = this;
 
     const nodeOptions = {
       paper,
@@ -77,11 +76,7 @@ class ShapeGenerator {
   }
 
   public createEdge(nodeShape: NodeShape): EdgeShape | null {
-    const {
-      father,
-      direction,
-      depth,
-    } = this;
+    const { father, direction, depth } = this;
 
     if (!father || !direction) {
       return null;
@@ -95,8 +90,7 @@ class ShapeGenerator {
         sourceBBox: father.getBBox(),
         targetBBox: nodeShape.getBBox(),
         direction,
-      })
-
+      });
     } else if (depthType === DepthType.grandchild) {
       return createGrandchildEdgeShape({
         paper: this.paper,
@@ -104,7 +98,7 @@ class ShapeGenerator {
         targetBBox: nodeShape.getBBox(),
         direction,
         targetDepth: this.depth,
-      })
+      });
     }
 
     return null;

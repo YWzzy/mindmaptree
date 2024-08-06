@@ -1,3 +1,5 @@
+Updated NodeShape Class with Text Wrapping and Truncation
+
 import ShapeEventEmitter from "./common/shape-event-emitter";
 import NodeShapeStyle from "./common/node-shape-style";
 import { Direction } from "../types";
@@ -17,10 +19,9 @@ const invisibleX = -999999;
 const invisibleY = -999999;
 
 const defaultPaddingWidth = 40;
-const defaultRectHeight = 37;
+const defaultPaddingHeight = 20;
 const borderPadding = 6;
 
-// Add default max width and height
 const defaultMaxWidth = 200;
 const defaultMaxHeight = 500;
 
@@ -30,14 +31,14 @@ export interface NodeShapeOptions {
   y?: number;
   label: string;
   paddingWidth?: number;
-  rectHeight?: number;
+  paddingHeight?: number;
   labelBaseAttr?: Partial<RaphaelAttributes>;
   rectBaseAttr?: Partial<RaphaelAttributes>;
   borderBaseAttr?: Partial<RaphaelAttributes>;
   imageData?: ImageData | null;
   link?: string;
-  maxWidth?: number; // Add maxWidth option
-  maxHeight?: number; // Add maxHeight option
+  maxWidth?: number;
+  maxHeight?: number;
 }
 
 class NodeShape {
@@ -48,12 +49,12 @@ class NodeShape {
   private readonly rectShape: RaphaelElement;
   private readonly imageShape: RaphaelElement | null = null;
   private readonly paddingWidth: number;
-  private readonly rectHeight: number;
+  private readonly paddingHeight: number;
   private readonly shapeEventEmitter: ShapeEventEmitter;
   private readonly nodeShapeStyle: NodeShapeStyle;
   private readonly imageData: ImageData | null = null;
-  private readonly maxWidth: number; // Add maxWidth property
-  private readonly maxHeight: number; // Add maxHeight property
+  private readonly maxWidth: number;
+  private readonly maxHeight: number;
   private label: string;
   private isHide: boolean = false;
   private isHoverInCalled: boolean = false;
@@ -64,19 +65,19 @@ class NodeShape {
     y,
     label,
     paddingWidth = defaultPaddingWidth,
-    rectHeight = defaultRectHeight,
+    paddingHeight = defaultPaddingHeight,
     labelBaseAttr,
     rectBaseAttr,
     borderBaseAttr,
     imageData,
     link,
-    maxWidth = defaultMaxWidth, // Set default maxWidth
-    maxHeight = defaultMaxHeight, // Set default maxHeight
+    maxWidth = defaultMaxWidth,
+    maxHeight = defaultMaxHeight,
   }: NodeShapeOptions) {
     this.paper = paper;
     this.label = label;
     this.paddingWidth = paddingWidth;
-    this.rectHeight = rectHeight;
+    this.paddingHeight = paddingHeight;
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
 
@@ -142,34 +143,17 @@ class NodeShape {
     this.initHover();
   }
 
-  // 获取矩形边界框
-  public getBBox(): RaphaelAxisAlignedBoundingBox {
-    return this.rectShape.getBBox();
-  }
-
-  // 获取标签边界框
-  public getLabelBBox(): RaphaelAxisAlignedBoundingBox {
-    return this.labelShape.getBBox();
-  }
-
-  // 设置标签
   public setLabel(label: string, direction?: Direction): void {
     this.label = label;
     const maxContentWidth = this.maxWidth - this.paddingWidth;
-    const maxContentHeight = this.maxHeight - this.paddingWidth;
+    const maxContentHeight = this.maxHeight - this.paddingHeight;
 
     const wrappedText = this.wrapText(label, maxContentWidth, maxContentHeight);
     this.labelShape.attr({ text: wrappedText });
 
     const updatedLabelBBox = this.getLabelBBox();
-    const contentWidth = Math.min(
-      updatedLabelBBox.width + this.paddingWidth,
-      this.maxWidth
-    );
-    const contentHeight = Math.min(
-      updatedLabelBBox.height + this.paddingWidth,
-      this.maxHeight
-    );
+    const contentWidth = Math.min(updatedLabelBBox.width + this.paddingWidth, this.maxWidth);
+    const contentHeight = Math.min(updatedLabelBBox.height + this.paddingHeight, this.maxHeight);
 
     this.rectShape.attr({
       width: contentWidth,
@@ -191,105 +175,66 @@ class NodeShape {
 
     this.clipContent(contentWidth, contentHeight);
   }
-  // 平移到指定位置
-  public translateTo(x: number, y: number): void {
-    const { x: oldX, y: oldY } = this.getBBox();
-    const dx = x - oldX;
-    const dy = y - oldY;
 
-    this.show();
+  private wrapText(text: string, maxWidth: number, maxHeight: number): string {
+    const words = text.split(' ');
+    let lines = [];
+    let currentLine = words[0];
 
-    if (dx === 0 && dy === 0) return;
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = this.getTextWidth(currentLine + ' ' + word);
+      
+      if (width < maxWidth) {
+        currentLine += ' ' + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    lines.push(currentLine);
 
-    this.shapeSet.translate(dx, dy);
+    // Truncate if exceeds maxHeight
+    let totalHeight = 0;
+    let truncatedLines = [];
+    for (let line of lines) {
+      totalHeight += this.getTextHeight(line);
+      if (totalHeight > maxHeight) {
+        if (truncatedLines.length > 0) {
+          truncatedLines[truncatedLines.length - 1] += '...';
+        } else {
+          truncatedLines.push(line + '...');
+        }
+        break;
+      }
+      truncatedLines.push(line);
+    }
+
+    return truncatedLines.join('\n');
   }
 
-  // 按指定偏移量平移
-  public translate(dx: number, dy: number): void {
-    this.shapeSet.translate(dx, dy);
-  }
-
-  // 设置样式
-  public setStyle(styleType: StyleType): void {
-    this.nodeShapeStyle.setStyle(styleType);
-  }
-
-  // 获取当前样式
-  public getStyle(): StyleType {
-    return this.nodeShapeStyle.getStyle();
-  }
-
-  // 克隆当前形状
-  public clone(): NodeShape {
-    const { x, y } = this.getBBox();
-    return new NodeShape({
-      paper: this.paper,
-      x,
-      y,
-      label: this.label,
-      paddingWidth: this.paddingWidth,
-      rectHeight: this.rectHeight,
-      ...this.nodeShapeStyle.getBaseAttr(),
+  private getTextWidth(text: string): number {
+    const font = this.labelShape.attr('font') as string;
+    const fontSize = this.labelShape.attr('font-size') as number;
+    const tempText = this.paper.text(0, 0, text).attr({
+      font: font,
+      'font-size': fontSize
     });
+    const width = tempText.getBBox().width;
+    tempText.remove();
+    return width;
   }
 
-  // 移除形状
-  public remove(): void {
-    this.shapeSet.remove();
-    this.shapeEventEmitter.removeAllListeners();
-  }
-
-  // 添加事件监听器
-  public on<T extends EventNames>(
-    eventName: EventNames,
-    ...args: EventArgs<T>
-  ): void {
-    this.shapeEventEmitter.on(eventName, ...args);
-  }
-
-  // 显示形状
-  public show(): void {
-    this.shapeSet.show();
-    this.isHide = false;
-  }
-
-  // 隐藏形状
-  public hide(): void {
-    this.shapeSet.hide();
-    this.isHide = true;
-  }
-
-  // 获取是否隐藏状态
-  public getIsHide(): boolean {
-    return this.isHide;
-  }
-
-  // 将形状移到前面
-  public toFront(): void {
-    this.borderShape.toFront();
-    this.rectShape.toFront();
-    this.labelShape.toFront();
-  }
-
-  // 检查形状是否在不可见位置
-  public isInvisible(): boolean {
-    const bbox = this.getBBox();
-    return bbox.x === invisibleX && bbox.y === invisibleY;
-  }
-
-  // 内部方法：平移形状到指定位置
-  private shapeTranslateTo(
-    shape: RaphaelElement | RaphaelSet,
-    x: number,
-    y: number
-  ): void {
-    const { x: oldX, y: oldY } = shape.getBBox();
-    const dx = x - oldX;
-    const dy = y - oldY;
-
-    if (dx === 0 && dy === 0) return;
-
-    shape.translate(dx, dy);
+  private getTextHeight(text: string): number {
+    const font = this.labelShape.attr('font') as string;
+    const fontSize = this.labelShape.attr('font-size') as number;
+    const tempText = this.paper.text(0, 0, text).attr({
+      font: font,
+      'font-size': fontSize
+    });
+    const height = tempText.getBBox().height;
+    tempText.remove();
+    return height;
   }
 
   private setPosition(x: number, y: number): void {
@@ -299,6 +244,7 @@ class NodeShape {
       rectShape,
       imageShape,
       paddingWidth,
+      paddingHeight,
       imageData,
     } = this;
 
@@ -318,10 +264,8 @@ class NodeShape {
           : 8;
     }
 
-    const contentWidth =
-      leftBBox.width + rightBBox.width + paddingWidth + imageGap;
-    const contentHeight =
-      Math.max(leftBBox.height, rightBBox.height) + paddingWidth;
+    const contentWidth = leftBBox.width + rightBBox.width + paddingWidth + imageGap;
+    const contentHeight = Math.max(leftBBox.height, rightBBox.height) + paddingHeight;
 
     rectShape.attr({
       width: contentWidth,
@@ -345,67 +289,6 @@ class NodeShape {
     );
     leftShape && this.shapeTranslateTo(leftShape, leftShapeX, leftShapeY);
     rightShape && this.shapeTranslateTo(rightShape, rightShapeX, rightShapeY);
-  }
-
-  private wrapText(text: string, maxWidth: number, maxHeight: number): string {
-    const words = text.split(" ");
-    let lines = [];
-    let currentLine = words[0];
-
-    for (let i = 1; i < words.length; i++) {
-      const word = words[i];
-      const width = this.getTextWidth(currentLine + " " + word);
-
-      if (width < maxWidth) {
-        currentLine += " " + word;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    }
-    lines.push(currentLine);
-
-    // Truncate if exceeds maxHeight
-    let totalHeight = 0;
-    let truncatedLines = [];
-    for (let line of lines) {
-      totalHeight += this.getTextHeight(line);
-      if (totalHeight > maxHeight) {
-        if (truncatedLines.length > 0) {
-          truncatedLines[truncatedLines.length - 1] += "...";
-        } else {
-          truncatedLines.push(line + "...");
-        }
-        break;
-      }
-      truncatedLines.push(line);
-    }
-
-    return truncatedLines.join("\n");
-  }
-
-  private getTextWidth(text: string): number {
-    const font = this.labelShape.attr("font") as string;
-    const fontSize = this.labelShape.attr("font-size") as number;
-    const tempText = this.paper.text(0, 0, text).attr({
-      font: font,
-      "font-size": fontSize,
-    });
-    const width = tempText.getBBox().width;
-    tempText.remove();
-    return width;
-  }
-
-  private getTextHeight(text: string): number {
-    const font = this.labelShape.attr("font") as string;
-    const fontSize = this.labelShape.attr("font-size") as number;
-    const tempText = this.paper.text(0, 0, text).attr({
-      font: font,
-      "font-size": fontSize,
-    });
-    const height = tempText.getBBox().height;
-    tempText.remove();
-    return height;
   }
 
   private clipContent(width: number, height: number): void {

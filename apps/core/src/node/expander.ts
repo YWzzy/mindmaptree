@@ -1,12 +1,11 @@
-
-import EventEmitter from 'eventemitter3';
-import Position from '../position';
-import Node from './node';
-import NodeShape from '../shape/node-shape';
-import ExpanderShape from '../shape/expander-shape';
-import type { RaphaelPaper } from 'raphael';
-import type { TraverseFunc, TraverseOptions } from './node';
-import { isMobile } from '../helper';
+import EventEmitter from "eventemitter3";
+import Position from "../position";
+import Node from "./node";
+import NodeShape from "../shape/node-shape";
+import ExpanderShape from "../shape/expander-shape";
+import type { RaphaelPaper } from "raphael";
+import type { TraverseFunc, TraverseOptions } from "./node";
+import { isMobile } from "../helper";
 
 export interface ExpanderEventMap {
   mousedownExpander: (newIsExpander: boolean) => void;
@@ -20,6 +19,8 @@ class Expander {
   private readonly traverse: TraverseFunc;
   private expanderShape: ExpanderShape | null = null;
   private isExpand: boolean;
+
+  // 构造函数
   public constructor({
     paper,
     node,
@@ -41,10 +42,12 @@ class Expander {
     this.eventEmitter = new EventEmitter<ExpanderEventMap>();
   }
 
+  // 获取当前展开状态
   public getIsExpand(): boolean {
     return this.isExpand;
   }
 
+  // 改变展开状态
   public changeExpand(newIsExpand: boolean): void {
     if (this.isExpand === newIsExpand) return;
 
@@ -63,17 +66,20 @@ class Expander {
     }
   }
 
+  // 创建扩展器
   public create(): void {
     this.createShape();
     this.translateShape();
   }
 
+  // 移除扩展器
   public remove(): void {
     this.expanderShape?.remove();
     this.expanderShape = null;
     this.eventEmitter.removeAllListeners();
   }
 
+  // 监听事件
   public on<T extends EventEmitter.EventNames<ExpanderEventMap>>(
     eventName: T,
     callback: EventEmitter.EventListener<ExpanderEventMap, T>
@@ -81,16 +87,20 @@ class Expander {
     this.eventEmitter.on(eventName, callback);
   }
 
-  public setStyle(styleType: 'disable' | 'base'): void {
+  // 设置样式
+  public setStyle(styleType: "disable" | "base"): void {
     this.expanderShape?.setStyle(styleType);
   }
 
+  // 创建扩展器形状
   private createShape(): void {
     if (
-      this.node.isRoot() || this.expanderShape !== null
-      || this.node.children.length === 0
-      || this.nodeShape.getIsHide()
-    ) return;
+      this.node.isRoot() ||
+      this.expanderShape !== null ||
+      this.node.children.length === 0 ||
+      this.nodeShape.getIsHide()
+    )
+      return;
 
     this.expanderShape = new ExpanderShape({
       paper: this.paper,
@@ -99,20 +109,22 @@ class Expander {
       direction: this.node.direction!,
     });
 
-    const mousedownName = isMobile ? 'touchstart' : 'mousedown';
+    const mousedownName = isMobile ? "touchstart" : "mousedown";
     this.expanderShape?.on(mousedownName, (event: MouseEvent) => {
       event.stopPropagation();
       const newIsExpand = !this.isExpand;
       this.changeExpand(newIsExpand);
 
-      this.eventEmitter.emit('mousedownExpander', newIsExpand);
+      this.eventEmitter.emit("mousedownExpander", newIsExpand);
     });
   }
 
+  // 平移扩展器形状
   private translateShape(): void {
     this.expanderShape?.translateTo(this.node.getBBox(), this.node.direction!);
   }
 
+  // 隐藏节点
   private hideNode({
     nodeShape,
     expander,
