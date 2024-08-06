@@ -36,7 +36,7 @@ class Undo {
   } {
     const { el, btnEl } = createToolbarItem({
       iconName: "undo",
-      tipLabel: "撤销",
+      tipLabel: "撤销（Ctrl + Z）",
     });
 
     btnEl.addEventListener(

@@ -1,13 +1,13 @@
-import Node from './node/node';
-import Viewport from './viewport';
-import Selection from './selection/selection';
-import { fontSize as rootFontSize } from './shape/root-node-shape';
-import { fontSize as firstNodeFontSize } from './shape/first-node-shape';
-import { fontSize as grandchildFontSize } from './shape/grandchild-node-shape';
-import { DepthType } from './helper';
-import DataHandler from './data/data-handler';
-import PaperWrapper from './paper-wrapper';
-import { isMobile } from './helper';
+import Node from "./node/node";
+import Viewport from "./viewport";
+import Selection from "./selection/selection";
+import { fontSize as rootFontSize } from "./shape/root-node-shape";
+import { fontSize as firstNodeFontSize } from "./shape/first-node-shape";
+import { fontSize as grandchildFontSize } from "./shape/grandchild-node-shape";
+import { DepthType } from "./helper";
+import DataHandler from "./data/data-handler";
+import PaperWrapper from "./paper-wrapper";
+import { isMobile } from "./helper";
 
 const fontSizeMap = {
   [DepthType.root]: rootFontSize,
@@ -45,7 +45,7 @@ class TextEditor {
       return;
     }
 
-    selection.on('select', () => {
+    selection.on("select", () => {
       const selectNodes = selection.getSelectNodes();
 
       // If selectNodes has only one and is different, then focus and set label
@@ -57,7 +57,10 @@ class TextEditor {
 
         this.node = selectNodes[0];
         this.translate();
-      } else if (this.node !== null && (selectNodes.length !== 1 || selectNodes[0].id !== this.node.id)) {
+      } else if (
+        this.node !== null &&
+        (selectNodes.length !== 1 || selectNodes[0].id !== this.node.id)
+      ) {
         this.setLabel();
 
         this.editorDom.blur();
@@ -67,17 +70,16 @@ class TextEditor {
       }
     });
 
-    this.editorDom.addEventListener('compositionstart', () => {
+    this.editorDom.addEventListener("compositionstart", () => {
       if (!this.isShow) this.show();
       this.isComposition = true;
     });
 
-    this.editorDom.addEventListener('compositionend', () => {
+    this.editorDom.addEventListener("compositionend", () => {
       this.isComposition = false;
     });
 
-
-    this.editorDom.addEventListener('input', (event: Event) => {
+    this.editorDom.addEventListener("input", (event: Event) => {
       // @ts-ignore
       const inputValue = event.data;
       if (!this.isShow) {
@@ -86,7 +88,7 @@ class TextEditor {
         } else if (this.isEditableKey(inputValue)) {
           this.show();
         } else {
-          this.editorDom.innerText = '';
+          this.editorDom.innerText = "";
         }
       }
     });
@@ -94,12 +96,61 @@ class TextEditor {
 
   public showBySelectionLabel(): void {
     this.show();
-    this.editorDom.innerText = this.node?.label || '';
+    this.editorDom.innerText = this.node?.label || "";
 
     // @ts-ignore
-    document.execCommand('selectAll', false, null);
+    document.execCommand("selectAll", false, null);
     // @ts-ignore
     document.getSelection().collapseToEnd();
+  }
+
+  // 根据节点的深度类型，宽高，计算文本的换行
+  public wrapText(
+    newLabel: string,
+    maxWidth: number,
+    maxHeight: number
+  ): string {
+    const text = newLabel;
+    const fontSize = fontSizeMap[this.node?.getDepthType() || DepthType.root];
+    let lines: string[] = [];
+    let currentLine = "";
+    const tempElement = document.createElement("div");
+    tempElement.style.position = "absolute";
+    tempElement.style.whiteSpace = "nowrap";
+    tempElement.style.visibility = "hidden";
+    tempElement.style.fontSize = `${fontSize}px`;
+    document.body.appendChild(tempElement);
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      tempElement.innerText = currentLine + char;
+      if (tempElement.offsetWidth < maxWidth) {
+        currentLine += char;
+      } else {
+        lines.push(currentLine);
+        currentLine = char;
+      }
+    }
+    lines.push(currentLine);
+
+    let totalHeight = 0;
+    let truncatedLines: string[] = [];
+    for (let line of lines) {
+      tempElement.innerText = line;
+      totalHeight += tempElement.offsetHeight;
+      if (totalHeight > maxHeight) {
+        if (truncatedLines.length > 0) {
+          truncatedLines[truncatedLines.length - 1] += "...";
+        } else {
+          truncatedLines.push(line + "...");
+        }
+        break;
+      }
+      truncatedLines.push(line);
+    }
+
+    document.body.removeChild(tempElement);
+    return truncatedLines.join("\n");
   }
 
   public isShowing(): boolean {
@@ -113,18 +164,17 @@ class TextEditor {
   }
 
   public hide(): void {
-    this.editorWrapperDom.style.zIndex = '-9999';
-    this.editorDom.innerText = '';
+    this.editorWrapperDom.style.zIndex = "-9999";
+    this.editorDom.innerText = "";
     this.isShow = false;
   }
-
 
   private show(): void {
     if (this.node === null) return;
 
     const scale = this.viewport.getScale();
     const fontSize = fontSizeMap[this.node.getDepthType()] * scale;
-    this.editorWrapperDom.style.zIndex = '3';
+    this.editorWrapperDom.style.zIndex = "3";
     this.editorDom.style.fontSize = `${fontSize}px`;
     this.translate();
     this.editorDom.focus();
@@ -136,12 +186,12 @@ class TextEditor {
     editorWrapperDom: HTMLDivElement;
     editorDom: HTMLDivElement;
   } {
-    const editorWrapperDom = document.createElement('div');
-    editorWrapperDom.className = 'node-edit-text-wrapper';
+    const editorWrapperDom = document.createElement("div");
+    editorWrapperDom.className = "node-edit-text-wrapper";
 
-    const editorDom = document.createElement('div');
-    editorDom.className = 'node-edit-text';
-    editorDom.setAttribute('contenteditable', 'true');
+    const editorDom = document.createElement("div");
+    editorDom.className = "node-edit-text";
+    editorDom.setAttribute("contenteditable", "true");
 
     const containerDom = paperWrapper.getContainerDom();
 
@@ -151,11 +201,23 @@ class TextEditor {
     return {
       editorWrapperDom,
       editorDom,
-    }
+    };
   }
 
   private isEditableKey(key: string): boolean {
-    const editableOtherKeys = ['`', '-', '=', '[', ']', '\\', ';', '\'', ',', '.', '/'];
+    const editableOtherKeys = [
+      "`",
+      "-",
+      "=",
+      "[",
+      "]",
+      "\\",
+      ";",
+      "'",
+      ",",
+      ".",
+      "/",
+    ];
     return /^[\w]$/.test(key) || editableOtherKeys.includes(key);
   }
 
@@ -177,8 +239,9 @@ class TextEditor {
   private setLabel(): void {
     const newLabel = this.editorDom.innerText;
     if (this.node !== null && this.isShow && newLabel !== this.node.label) {
+      const wrappedText = this.wrapText(newLabel, 300, 500);
       this.dataHandler.update(this.node.id, {
-        label: newLabel,
+        label: wrappedText,
       });
     }
   }

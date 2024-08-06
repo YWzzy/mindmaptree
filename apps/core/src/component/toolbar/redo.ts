@@ -36,7 +36,7 @@ class Redo {
   } {
     const { el, btnEl } = createToolbarItem({
       iconName: "redo",
-      tipLabel: "恢复",
+      tipLabel: "恢复（Ctrl + Y）",
     });
 
     btnEl.addEventListener(

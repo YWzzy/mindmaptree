@@ -37,7 +37,7 @@ class AddChild {
   } {
     const { el, btnEl } = createToolbarItem({
       iconName: "add-brother",
-      tipLabel: "添加同级主题",
+      tipLabel: "添加同级主题（Ctrl + 1）",
     });
 
     btnEl.addEventListener(

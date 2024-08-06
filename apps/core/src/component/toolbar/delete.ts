@@ -37,7 +37,7 @@ class Delete {
   } {
     const { el, btnEl } = createToolbarItem({
       iconName: "delete",
-      tipLabel: "删除",
+      tipLabel: "删除（Ctrl + Alt 可多选）",
     });
 
     btnEl.addEventListener(

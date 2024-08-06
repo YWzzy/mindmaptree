@@ -1,7 +1,7 @@
-import ToolOperation from '../../tool-operation';
-import Selection from '../../selection/selection';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import ToolOperation from "../../tool-operation";
+import Selection from "../../selection/selection";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class AddChild {
   public readonly el: MElement;
@@ -25,9 +25,9 @@ class AddChild {
   public setState(): void {
     const selectNodes = this.selection.getSelectNodes();
     if (selectNodes.length === 1) {
-      this.btnEl.removeClass('disabled');
+      this.btnEl.removeClass("disabled");
     } else {
-      this.btnEl.addClass('disabled');
+      this.btnEl.addClass("disabled");
     }
   }
 
@@ -35,17 +35,18 @@ class AddChild {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'add-child',
-      tipLabel: '添加子主题',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "add-child",
+      tipLabel: "添加子主题（Ctrl + 2）",
     });
 
-    btnEl.addEventListener('click', () => {
-      this.toolOperation.addChildNode();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.toolOperation.addChildNode();
+      },
+      false
+    );
 
     return {
       el,

@@ -37,7 +37,7 @@ class Edit {
   } {
     const { el, btnEl } = createToolbarItem({
       iconName: "edit",
-      tipLabel: "编辑文本",
+      tipLabel: "编辑文本（' + - = : ?）",
     });
 
     btnEl.addEventListener(
