@@ -1,7 +1,7 @@
-import TextEditor from '../../text-editor';
-import Selection from '../../selection/selection';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import TextEditor from "../../text-editor";
+import Selection from "../../selection/selection";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class Edit {
   public readonly el: MElement;
@@ -25,9 +25,9 @@ class Edit {
   public setState(): void {
     const selectNodes = this.selection.getSelectNodes();
     if (selectNodes.length === 1) {
-      this.btnEl.removeClass('disabled');
+      this.btnEl.removeClass("disabled");
     } else {
-      this.btnEl.addClass('disabled');
+      this.btnEl.addClass("disabled");
     }
   }
 
@@ -35,17 +35,18 @@ class Edit {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'edit',
-      tipLabel: 'Edit Text',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "edit",
+      tipLabel: "编辑文本",
     });
 
-    btnEl.addEventListener('click', () => {
-      this.textEditor.showBySelectionLabel();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.textEditor.showBySelectionLabel();
+      },
+      false
+    );
 
     return {
       el,

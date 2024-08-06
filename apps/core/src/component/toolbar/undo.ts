@@ -1,7 +1,7 @@
-import DataHandler from '../../data/data-handler';
-import ToolOperation from '../../tool-operation';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import DataHandler from "../../data/data-handler";
+import ToolOperation from "../../tool-operation";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class Undo {
   public readonly el: MElement;
@@ -24,9 +24,9 @@ class Undo {
 
   public setState(): void {
     if (this.dataHandler.canUndo()) {
-      this.btnEl.removeClass('disabled');
+      this.btnEl.removeClass("disabled");
     } else {
-      this.btnEl.addClass('disabled');
+      this.btnEl.addClass("disabled");
     }
   }
 
@@ -34,17 +34,18 @@ class Undo {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'undo',
-      tipLabel: 'Undo',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "undo",
+      tipLabel: "撤销",
     });
 
-    btnEl.addEventListener('click', () => {
-      this.toolOperation.undo();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.toolOperation.undo();
+      },
+      false
+    );
 
     return {
       el,

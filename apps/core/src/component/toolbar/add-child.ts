@@ -40,7 +40,7 @@ class AddChild {
       btnEl,
     } = createToolbarItem({
       iconName: 'add-child',
-      tipLabel: 'Add Subtopic',
+      tipLabel: '添加子主题',
     });
 
     btnEl.addEventListener('click', () => {

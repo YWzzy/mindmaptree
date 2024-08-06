@@ -4,8 +4,8 @@ import { DepthType } from "../helper";
 import { updateNodeDataMap, getFatherDatas } from "./data-helper";
 import type { NodeData } from "../types";
 
-const firstLevetNodeName = "Main Topic"; // 一级节点名称
-const grandchildNodeName = "Subtopic"; // 孙节点名称
+const firstLevetNodeName = "主要主题"; // 一级节点名称
+const grandchildNodeName = "子主题"; // 孙节点名称
 
 class AddHandler {
   // 构造函数接受 ydoc 和 nodeDataMap 作为参数

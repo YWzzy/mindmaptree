@@ -1,7 +1,7 @@
-import ToolOperation from '../../tool-operation';
-import Selection from '../../selection/selection';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import ToolOperation from "../../tool-operation";
+import Selection from "../../selection/selection";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class Delete {
   public readonly el: MElement;
@@ -25,9 +25,9 @@ class Delete {
   public setState(): void {
     const selectNodes = this.selection.getSelectNodes();
     if (selectNodes.length > 0) {
-      this.btnEl.removeClass('disabled');
+      this.btnEl.removeClass("disabled");
     } else {
-      this.btnEl.addClass('disabled');
+      this.btnEl.addClass("disabled");
     }
   }
 
@@ -35,17 +35,18 @@ class Delete {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'delete',
-      tipLabel: 'Delete',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "delete",
+      tipLabel: "删除",
     });
 
-    btnEl.addEventListener('click', () => {
-      this.toolOperation.removeNode();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.toolOperation.removeNode();
+      },
+      false
+    );
 
     return {
       el,

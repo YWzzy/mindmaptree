@@ -16,12 +16,12 @@ import type { ImageData } from "../types";
 const invisibleX = -999999;
 const invisibleY = -999999;
 
-const defaultPaddingWidth = 40;
+const defaultPaddingWidth = 20;
 const defaultRectHeight = 37;
 const borderPadding = 6;
 
 // Add default max width and height
-const defaultMaxWidth = 200;
+const defaultMaxWidth = 400;
 const defaultMaxHeight = 500;
 
 export interface NodeShapeOptions {
@@ -64,7 +64,7 @@ class NodeShape {
     y,
     label,
     paddingWidth = defaultPaddingWidth,
-    rectHeight = defaultRectHeight,
+    rectHeight = Math.max(defaultRectHeight, defaultMaxHeight),
     labelBaseAttr,
     rectBaseAttr,
     borderBaseAttr,
@@ -113,9 +113,9 @@ class NodeShape {
       this.labelShape.attr({
         stroke: "#3498DB",
       });
-      // @ts-ignore
-      this.labelShape.node.style.cursor = "pointer";
     }
+    // @ts-ignore
+    this.labelShape.node.style.cursor = "pointer";
 
     this.nodeShapeStyle = new NodeShapeStyle({
       shapeSet: this.shapeSet,
@@ -132,7 +132,7 @@ class NodeShape {
     // @ts-ignore
     this.labelShape.node.style["user-select"] = "none";
 
-    this.setPosition(shapeX, shapeY);
+    this.setLabel(label);
     this.shapeEventEmitter = new ShapeEventEmitter(this.shapeSet);
 
     if (!hasValidPosition) {
@@ -154,24 +154,43 @@ class NodeShape {
 
   // 设置标签
   public setLabel(label: string, direction?: Direction): void {
-    const beforeLabelBBox = this.labelShape.getBBox();
-    this.labelShape.attr({
-      text: label,
+    this.label = label;
+    const maxContentWidth = this.maxWidth - this.paddingWidth;
+    const maxContentHeight = this.maxHeight - this.paddingWidth;
+
+    const wrappedText = this.wrapText(label, maxContentWidth, maxContentHeight);
+    this.labelShape.attr({ text: wrappedText });
+
+    const updatedLabelBBox = this.getLabelBBox();
+    const contentWidth = Math.min(
+      updatedLabelBBox.width + this.paddingWidth,
+      this.maxWidth
+    );
+    const contentHeight = Math.min(
+      updatedLabelBBox.height + this.paddingWidth,
+      this.maxHeight
+    );
+
+    this.rectShape.attr({
+      width: contentWidth,
+      height: contentHeight,
     });
-    const afterLabelBBox = this.labelShape.getBBox();
+
+    this.borderShape.attr({
+      width: contentWidth + borderPadding,
+      height: contentHeight + borderPadding,
+    });
 
     const bbox = this.getBBox();
-    const diff = afterLabelBBox.width - beforeLabelBBox.width;
-
     this.setPosition(bbox.x, bbox.y);
 
     if (direction !== Direction.RIGHT && direction !== Direction.LEFT) {
+      const diff = contentWidth - (bbox.width - this.paddingWidth);
       this.shapeSet.translate(-diff / 2, 0);
     }
 
-    this.label = label;
+    this.clipContent(contentWidth, contentHeight);
   }
-
   // 平移到指定位置
   public translateTo(x: number, y: number): void {
     const { x: oldX, y: oldY } = this.getBBox();
@@ -280,14 +299,10 @@ class NodeShape {
       rectShape,
       imageShape,
       paddingWidth,
-      rectHeight,
       imageData,
-      maxWidth,
-      maxHeight,
     } = this;
 
     const labelBBox = labelShape.getBBox();
-    const paddingHeight = rectHeight - labelBBox.height;
 
     const leftShape = imageData?.toward === "right" ? labelShape : imageShape;
     const rightShape = imageData?.toward === "right" ? imageShape : labelShape;
@@ -303,14 +318,10 @@ class NodeShape {
           : 8;
     }
 
-    let contentWidth =
+    const contentWidth =
       leftBBox.width + rightBBox.width + paddingWidth + imageGap;
-    let contentHeight =
-      paddingHeight + Math.max(leftBBox.height, rightBBox.height);
-
-    // Limit content size to maxWidth and maxHeight
-    contentWidth = Math.min(contentWidth, maxWidth);
-    contentHeight = Math.min(contentHeight, maxHeight);
+    const contentHeight =
+      Math.max(leftBBox.height, rightBBox.height) + paddingWidth;
 
     rectShape.attr({
       width: contentWidth,
@@ -334,26 +345,109 @@ class NodeShape {
     );
     leftShape && this.shapeTranslateTo(leftShape, leftShapeX, leftShapeY);
     rightShape && this.shapeTranslateTo(rightShape, rightShapeX, rightShapeY);
+  }
 
-    // Clip content that exceeds max dimensions
-    this.clipContent(contentWidth, contentHeight);
+  // 文本换行
+  private wrapText(text: string, maxWidth: number, maxHeight: number): string {
+    const words = text.split(" ");
+    let lines: string[] = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const width = this.getTextWidth(currentLine + " " + word);
+
+      if (width < maxWidth) {
+        currentLine += " " + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    lines.push(currentLine);
+
+    // Truncate if exceeds maxHeight
+    let totalHeight = 0;
+    let truncatedLines: string[] = [];
+    for (let line of lines) {
+      const lineHeight = this.getTextHeight(line);
+      totalHeight += lineHeight;
+      if (totalHeight > maxHeight) {
+        const remainingHeight = maxHeight - (totalHeight - lineHeight);
+        if (remainingHeight > 0) {
+          truncatedLines.push(
+            this.truncateLine(line, maxWidth, remainingHeight)
+          );
+        } else if (truncatedLines.length > 0) {
+          truncatedLines[truncatedLines.length - 1] += "...";
+        } else {
+          truncatedLines.push(line + "...");
+        }
+        break;
+      }
+      truncatedLines.push(line);
+    }
+
+    return truncatedLines.join("\n");
+  }
+
+  private truncateLine(
+    line: string,
+    maxWidth: number,
+    remainingHeight: number
+  ): string {
+    let truncatedLine = "";
+    for (let i = 0; i < line.length; i++) {
+      truncatedLine += line[i];
+      if (this.getTextWidth(truncatedLine) > maxWidth) {
+        return truncatedLine.slice(0, -1) + "...";
+      }
+    }
+    return truncatedLine;
+  }
+
+  private getTextWidth(text: string): number {
+    const fontSize = this.labelShape.attr("font-size") as number;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const textElement = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+    textElement.setAttribute("font-size", fontSize.toString());
+    textElement.setAttribute("font-family", "Arial");
+    textElement.textContent = text;
+    svg.appendChild(textElement);
+    document.body.appendChild(svg);
+    const bbox = textElement.getBBox();
+    document.body.removeChild(svg);
+    return bbox.width;
+  }
+
+  private getTextHeight(text: string): number {
+    const fontSize = this.labelShape.attr("font-size") as number;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const textElement = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "text"
+    );
+    textElement.setAttribute("font-size", fontSize.toString());
+    textElement.setAttribute("font-family", "Arial");
+    textElement.textContent = text;
+    svg.appendChild(textElement);
+    document.body.appendChild(svg);
+    const bbox = textElement.getBBox();
+    document.body.removeChild(svg);
+    return bbox.height;
   }
 
   private clipContent(width: number, height: number): void {
-    console.log("====================================");
-    console.log("width, height", width, height);
-    console.log("====================================");
     const clipPath = this.paper
-      .path(`M0,0 L${width},0 L${width},${height} L0,${height}Z`)
-      .attr({ stroke: "none" });
+      .rect(0, 0, width, height)
+      .attr({ fill: "white", stroke: "none" });
 
-    // Create a unique id for the clipPath
     const clipPathId = `clipPath_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Set the id of the clipPath
     (clipPath.node as SVGElement).id = clipPathId;
 
-    // Move the clipPath to a defs element
     const defs =
       this.paper.canvas.querySelector("defs") ||
       this.paper.canvas.insertBefore(
@@ -362,7 +456,6 @@ class NodeShape {
       );
     defs.appendChild(clipPath.node);
 
-    // Apply the clip-path to each element in the set
     this.shapeSet.forEach((element) => {
       (element.node as SVGElement).style.clipPath = `url(#${clipPathId})`;
     });

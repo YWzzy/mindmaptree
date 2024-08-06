@@ -1,6 +1,6 @@
-import ViewportInteraction from '../../viewport-interaction/viewport-interaction';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import ViewportInteraction from "../../viewport-interaction/viewport-interaction";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class Target {
   public readonly el: MElement;
@@ -9,7 +9,7 @@ class Target {
   constructor({
     viewportInteraction,
   }: {
-    viewportInteraction: ViewportInteraction
+    viewportInteraction: ViewportInteraction;
   }) {
     this.viewportInteraction = viewportInteraction;
     const elements = this.element();
@@ -21,18 +21,19 @@ class Target {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'target',
-      tipLabel: 'Locate to center',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "target",
+      tipLabel: "定位中心点",
       isDisabled: false,
     });
 
-    btnEl.addEventListener('click', () => {
-      this.viewportInteraction.translateToCenter();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.viewportInteraction.translateToCenter();
+      },
+      false
+    );
 
     return {
       el,

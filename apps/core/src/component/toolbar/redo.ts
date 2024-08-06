@@ -1,7 +1,7 @@
-import DataHandler from '../../data/data-handler';
-import ToolOperation from '../../tool-operation';
-import { MElement } from '../m-element';
-import { createToolbarItem } from './create-toolbar-item';
+import DataHandler from "../../data/data-handler";
+import ToolOperation from "../../tool-operation";
+import { MElement } from "../m-element";
+import { createToolbarItem } from "./create-toolbar-item";
 
 class Redo {
   public readonly el: MElement;
@@ -24,9 +24,9 @@ class Redo {
 
   public setState(): void {
     if (this.dataHandler.canRedo()) {
-      this.btnEl.removeClass('disabled');
+      this.btnEl.removeClass("disabled");
     } else {
-      this.btnEl.addClass('disabled');
+      this.btnEl.addClass("disabled");
     }
   }
 
@@ -34,17 +34,18 @@ class Redo {
     el: MElement;
     btnEl: MElement;
   } {
-    const {
-      el,
-      btnEl,
-    } = createToolbarItem({
-      iconName: 'redo',
-      tipLabel: 'Redo',
+    const { el, btnEl } = createToolbarItem({
+      iconName: "redo",
+      tipLabel: "恢复",
     });
 
-    btnEl.addEventListener('click', () => {
-      this.toolOperation.redo();
-    }, false);
+    btnEl.addEventListener(
+      "click",
+      () => {
+        this.toolOperation.redo();
+      },
+      false
+    );
 
     return {
       el,
